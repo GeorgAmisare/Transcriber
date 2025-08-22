@@ -42,6 +42,7 @@ class Orchestrator:
         """
         try:
             media = MediaProcessor()
+            media.validate(src_path)
             audio_path = media.extract_audio(src_path)
 
             text_segments = transcribe(audio_path)
