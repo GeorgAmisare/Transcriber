@@ -5,7 +5,7 @@ import sys
 import pytest
 
 # Запускаем PyQt5 в безголовом режиме, чтобы не требовался дисплей.
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ["QT_QPA_PLATFORM"] = "minimal"
 
 # PyQt5 нестабилен на Python 3.13, поэтому тесты пропускаются.
 if sys.version_info >= (3, 13):  # pragma: no cover
@@ -26,7 +26,7 @@ def _get_app() -> QApplication:
     """Возвращает экземпляр QApplication."""
     app = QApplication.instance()
     if app is None:
-        app = QApplication([])
+        app = QApplication(["", "-platform", "minimal"])
     return app
 
 
