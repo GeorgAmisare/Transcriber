@@ -46,9 +46,15 @@ class MainWindow(QWidget):
         """Отображает процесс обработки файла."""
         self._status_label.setText(messages.PROCESSING_MESSAGE)
 
-    def set_done(self) -> None:
-        """Отображает успешное завершение обработки."""
-        self._status_label.setText(messages.DONE_MESSAGE)
+    def set_done(self, result_path: Optional[str] = None) -> None:
+        """Отображает успешное завершение обработки.
+
+        :param result_path: путь к итоговому файлу.
+        """
+        message = messages.DONE_MESSAGE
+        if result_path:
+            message = f"{message}: {result_path}"
+        self._status_label.setText(message)
 
     def set_error(self, message: Optional[str] = None) -> None:
         """Отображает сообщение об ошибке.
