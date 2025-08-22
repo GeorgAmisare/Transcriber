@@ -43,8 +43,20 @@ jobs:
     steps:
       - name: Получение кода
         uses: actions/checkout@v4
-      - name: Установка lsb-release
-        run: apt-get update && apt-get install -y lsb-release
+      - name: Добавление утилиты lsb_release
+        run: |
+          cat <<'EOF' >/usr/bin/lsb_release
+          #!/bin/sh
+          . /etc/os-release
+          case "$1" in
+            -rs|-sr) echo "$VERSION_ID" ;;
+            -cs|-sc) echo "$VERSION_CODENAME" ;;
+            -si|-is) echo "$ID" ;;
+            -ds|-sd) echo "$PRETTY_NAME" ;;
+            *) echo "$ID" ;;
+          esac
+          EOF
+          chmod +x /usr/bin/lsb_release
       - name: Установка Python
         uses: actions/setup-python@v5
         with:
