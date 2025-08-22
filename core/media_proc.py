@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import os
 import subprocess
+from contextlib import contextmanager
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from typing import Iterator
 
 
 class MediaProcessor:
@@ -82,11 +85,35 @@ class MediaProcessor:
         except (FileNotFoundError, subprocess.SubprocessError, ValueError) as error:
             raise ValueError("Не удалось определить длительность файла") from error
 
-    def extract_audio(self, path: str) -> str:
-        """Извлекает аудио из видеофайла.
+    @contextmanager
+    def extract_audio(self, path: str) -> Iterator[str]:
+        """Возвращает путь к временному PCM-файлу и удаляет его."""
+        with NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+            tmp_path = tmp.name
 
-        :param path: путь к исходному файлу.
-        :return: путь к аудиофайлу.
-        """
-        # Возвращаем путь-заглушку
-        return f"{path}.wav"
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-i",
+            path,
+            "-ac",
+            "1",
+            "-ar",
+            "16000",
+            "-vn",
+            "-f",
+            "wav",
+            "-sample_fmt",
+            "s16",
+            tmp_path,
+        ]
+        try:
+            subprocess.run(
+                cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            yield tmp_path
+        finally:
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass

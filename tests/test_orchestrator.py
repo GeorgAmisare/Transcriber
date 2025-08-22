@@ -3,6 +3,7 @@
 from pathlib import Path
 import sys
 from unittest.mock import Mock
+from contextlib import contextmanager
 
 import pytest
 
@@ -29,14 +30,17 @@ def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
         call_order.append("validate")
         assert path == src_path
 
-    def extract_side_effect(path: str) -> str:
+    @contextmanager
+    def extract_side_effect(path: str):
         call_order.append("extract_audio")
         assert path == src_path
-        return audio_path
+        yield audio_path
 
     media_mock.validate.side_effect = validate_side_effect
     media_mock.extract_audio.side_effect = extract_side_effect
-    monkeypatch.setattr("core.orchestrator.MediaProcessor", Mock(return_value=media_mock))
+    monkeypatch.setattr(
+        "core.orchestrator.MediaProcessor", Mock(return_value=media_mock)
+    )
 
     def transcribe_side_effect(path: str) -> list[str]:
         call_order.append("transcribe")
@@ -59,10 +63,18 @@ def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
         assert lines == merged_lines
         assert path == expected_path
 
-    monkeypatch.setattr("core.orchestrator.transcribe", Mock(side_effect=transcribe_side_effect))
-    monkeypatch.setattr("core.orchestrator.diarize", Mock(side_effect=diarize_side_effect))
-    monkeypatch.setattr("core.orchestrator.merge_results", Mock(side_effect=merge_side_effect))
-    monkeypatch.setattr("core.orchestrator.export_txt", Mock(side_effect=export_side_effect))
+    monkeypatch.setattr(
+        "core.orchestrator.transcribe", Mock(side_effect=transcribe_side_effect)
+    )
+    monkeypatch.setattr(
+        "core.orchestrator.diarize", Mock(side_effect=diarize_side_effect)
+    )
+    monkeypatch.setattr(
+        "core.orchestrator.merge_results", Mock(side_effect=merge_side_effect)
+    )
+    monkeypatch.setattr(
+        "core.orchestrator.export_txt", Mock(side_effect=export_side_effect)
+    )
 
     result = Orchestrator().run(src_path)
 
@@ -75,4 +87,3 @@ def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
         "merge",
         "export",
     ]
-
