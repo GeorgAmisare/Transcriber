@@ -13,9 +13,14 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
     steps:
       - name: Получение кода
         uses: actions/checkout@v4
+      - name: Определение имени образа
+        id: meta
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
       - name: Вход в реестр GitHub
         uses: docker/login-action@v3
         with:
@@ -28,13 +33,13 @@ jobs:
           context: .
           file: Dockerfile.ci
           push: true
-          tags: ghcr.io/${{ github.repository }}:ci
+          tags: ${{ steps.meta.outputs.image }}:ci
 
   test:
     needs: build-image
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}:ci
+      image: ${{ needs.build-image.outputs.image }}:ci
     steps:
       - name: Получение кода
         uses: actions/checkout@v4
