@@ -1,8 +1,8 @@
 """Оркестратор приложения."""
 
-from core.media_proc import MediaProcessor
 from core.asr_whisper import transcribe
 from core.diarization import diarize
+from core.media_proc import MediaProcessor
 from core.postprocess import merge_results
 
 
