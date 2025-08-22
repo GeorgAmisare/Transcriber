@@ -43,6 +43,8 @@ jobs:
     steps:
       - name: Получение кода
         uses: actions/checkout@v4
+      - name: Доверенный путь для Git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Установка зависимостей для разработки
         run: pip install -r requirements-dev.txt
       - name: Проверка стиля
