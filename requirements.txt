@@ -2,4 +2,3 @@ PyQt5
 ffmpeg-python
 openai-whisper
 pyannote.audio
-pytest
