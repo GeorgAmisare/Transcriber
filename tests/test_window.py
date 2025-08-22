@@ -4,6 +4,9 @@ import os
 import sys
 import pytest
 
+# Запускаем PyQt5 в безголовом режиме, чтобы не требовался дисплей.
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 # PyQt5 нестабилен на Python 3.13, поэтому тесты пропускаются.
 if sys.version_info >= (3, 13):  # pragma: no cover
     pytest.skip("PyQt5 не поддерживает Python 3.13", allow_module_level=True)
@@ -15,13 +18,12 @@ try:
 except ImportError:  # pragma: no cover
     pytest.skip("PyQt5 is required for these tests", allow_module_level=True)
 
-from gui import messages
-from gui.window import MainWindow
+from gui import messages  # noqa: E402
+from gui.window import MainWindow  # noqa: E402
 
 
 def _get_app() -> QApplication:
     """Возвращает экземпляр QApplication."""
-    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
