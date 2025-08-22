@@ -62,6 +62,8 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+      - name: Установка pip
+        run: python -m ensurepip --upgrade
       - name: Кеш pip
         uses: actions/cache@v4
         with:
