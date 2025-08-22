@@ -43,14 +43,13 @@ class Orchestrator:
         try:
             media = MediaProcessor()
             media.validate(src_path)
-            audio_path = media.extract_audio(src_path)
+            with media.extract_audio(src_path) as audio_path:
+                text_segments = transcribe(audio_path)
+                speaker_segments = diarize(audio_path)
+                merged_lines = merge_results(text_segments, speaker_segments)
 
-            text_segments = transcribe(audio_path)
-            speaker_segments = diarize(audio_path)
-            merged_lines = merge_results(text_segments, speaker_segments)
-
-            result_path = build_output_path(src_path)
-            export_txt(merged_lines, result_path)
+                result_path = build_output_path(src_path)
+                export_txt(merged_lines, result_path)
 
             if self._on_done:
                 self._on_done(result_path)
