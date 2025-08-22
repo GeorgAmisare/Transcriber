@@ -70,4 +70,3 @@ class MainWindow(QWidget):
             file_path = urls[0].toLocalFile()
             self.set_processing()
             self.file_dropped.emit(file_path)
-
