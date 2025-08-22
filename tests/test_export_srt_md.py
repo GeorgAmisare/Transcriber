@@ -3,8 +3,8 @@
 import os
 import tempfile
 
-from core.export_srt import export_srt
 from core.export_md import export_md
+from core.export_srt import export_srt
 
 
 def _check_export(func, suffix: str) -> None:
