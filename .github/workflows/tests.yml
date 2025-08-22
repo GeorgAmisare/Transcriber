@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HUGGINGFACE_HUB_TOKEN: ${{ secrets.HF_TOKEN }}
     strategy:
       matrix:
         python-version: ['3.10', '3.11']
@@ -19,4 +20,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run tests
-        run: pytest
+        run: |
+          if [ -n "$HF_TOKEN" ]; then
+            pytest
+          else
+            echo "HF_TOKEN not set, skipping HF tests"
+            pytest -m 'not needs_hf'
+          fi
