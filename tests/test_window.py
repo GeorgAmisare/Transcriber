@@ -1,7 +1,12 @@
 """Тесты для окна PyQt5."""
 
 import os
+import sys
 import pytest
+
+# PyQt5 нестабилен на Python 3.13, поэтому тесты пропускаются.
+if sys.version_info >= (3, 13):  # pragma: no cover
+    pytest.skip("PyQt5 не поддерживает Python 3.13", allow_module_level=True)
 
 try:
     from PyQt5.QtCore import QMimeData, QPoint, QUrl, Qt
