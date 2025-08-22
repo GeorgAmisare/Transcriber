@@ -1,6 +1,16 @@
 """Модуль транскрибации."""
 
 from typing import List
+import os
+
+from dotenv import load_dotenv
+from huggingface_hub import login as hf_login
+
+
+load_dotenv()
+_token = os.getenv("HF_TOKEN")
+if _token:
+    hf_login(token=_token)
 
 
 def transcribe(path: str) -> List[str]:
