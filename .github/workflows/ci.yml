@@ -43,6 +43,16 @@ jobs:
     steps:
       - name: Получение кода
         uses: actions/checkout@v4
+      - name: Установка Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+      - name: Кеш pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-dev.txt') }}
       - name: Доверенный путь для Git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Установка зависимостей для разработки
