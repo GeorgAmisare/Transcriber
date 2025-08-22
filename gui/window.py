@@ -1,26 +1,73 @@
-"""Модуль окна приложения."""
+"""Окно приложения на базе PyQt5."""
+
+from __future__ import annotations
 
 from typing import Optional
 
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QDragEnterEvent, QDropEvent
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget
 
-class MainWindow:
+from gui import messages
+
+
+class MainWindow(QWidget):
     """Основное окно приложения.
 
     Отвечает за drag-n-drop файлов и отображение статусов.
     """
 
+    file_dropped = pyqtSignal(str)
+    """Сигнал, испускаемый при успешном переносе файла."""
+
     def __init__(self) -> None:
-        """Инициализирует окно приложения."""
-        self._current_status: Optional[str] = None
+        """Создаёт окно и настраивает интерфейс."""
+        super().__init__()
+        self.setAcceptDrops(True)
+        self.setWindowTitle("Транскрибатор")
 
-    def set_status(self, message: str) -> None:
-        """Устанавливает текущий статус.
+        self._status_label = QLabel(messages.READY_MESSAGE)
+        self._status_label.setAlignment(Qt.AlignCenter)
 
-        :param message: текст статуса.
+        layout = QVBoxLayout()
+        layout.addWidget(self._status_label)
+        self.setLayout(layout)
+
+    @property
+    def status_label(self) -> QLabel:
+        """Возвращает виджет с текстом статуса."""
+        return self._status_label
+
+    def set_waiting(self) -> None:
+        """Отображает ожидание загрузки файла."""
+        self._status_label.setText(messages.READY_MESSAGE)
+
+    def set_processing(self) -> None:
+        """Отображает процесс обработки файла."""
+        self._status_label.setText(messages.PROCESSING_MESSAGE)
+
+    def set_done(self) -> None:
+        """Отображает успешное завершение обработки."""
+        self._status_label.setText(messages.DONE_MESSAGE)
+
+    def set_error(self, message: Optional[str] = None) -> None:
+        """Отображает сообщение об ошибке.
+
+        :param message: текст ошибки; по умолчанию стандартное сообщение.
         """
-        self._current_status = message
+        self._status_label.setText(message or messages.ERROR_MESSAGE)
 
-    def show(self) -> None:
-        """Отображает окно."""
-        # Заглушка для отображения окна
-        self.set_status("Окно отображено")
+    # Реализация drag-n-drop -------------------------------------------------
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:  # noqa: N802
+        """Принимает перетаскиваемый объект, если это файл."""
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent) -> None:  # noqa: N802
+        """Обрабатывает отпускание файла на окне."""
+        urls = event.mimeData().urls()
+        if urls:
+            file_path = urls[0].toLocalFile()
+            self.set_processing()
+            self.file_dropped.emit(file_path)
+
