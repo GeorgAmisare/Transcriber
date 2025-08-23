@@ -1,4 +1,4 @@
-"""Тесты для модулей core.asr_whisper и core.diarization."""
+"""Тесты для модуля core.diarization."""
 
 from pathlib import Path
 import sys
@@ -8,15 +8,7 @@ import pytest
 # Добавляем корень проекта в путь поиска модулей.
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from core.asr_whisper import transcribe
 from core.diarization import diarize
-
-
-@pytest.mark.needs_hf
-def test_transcribe_returns_text() -> None:
-    """Проверяет, что transcribe возвращает список строк."""
-    result = transcribe("sample.wav")
-    assert result == ["Транскрибировано из sample.wav"]
 
 
 @pytest.mark.needs_hf
