@@ -19,7 +19,7 @@ def _collect_media() -> list[Path]:
     ]
 
 
-@pytest.mark.skipif(os.getenv("CI"), reason="Медиафайлы не хранятся в CI")
+@pytest.mark.skipif(bool(os.getenv("CI")), reason="Медиафайлы не хранятся в CI")
 def test_all_local_media_files_valid() -> None:
     """Проверяет, что все локальные медиафайлы проходят валидацию."""
     files = _collect_media()
