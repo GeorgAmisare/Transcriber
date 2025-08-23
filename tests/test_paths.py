@@ -11,5 +11,7 @@ from utils.paths import build_output_path
 
 def test_build_output_path_appends_suffix() -> None:
     """Проверяет добавление суффикса _transcript.txt к имени файла."""
-    src = "/tmp/audio.mp3"
-    assert build_output_path(src) == "/tmp/audio_transcript.txt"
+    src = Path("/tmp/audio.mp3")
+    expected = src.with_name(f"{src.stem}_transcript.txt")
+    # Нормализуем обе стороны как Path, чтобы абстрагироваться от разделителей
+    assert Path(build_output_path(str(src))) == expected
