@@ -54,6 +54,6 @@ class Orchestrator:
                 self._on_done(result_path)
             logger.info("Обработка %s завершена", src_path)
             return result_path
-        except Exception as error:  # noqa: BLE001
+        except Exception:  # noqa: BLE001
             logger.exception("Ошибка при обработке %s", src_path)
             return None
