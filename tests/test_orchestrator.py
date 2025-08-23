@@ -12,15 +12,23 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from core.orchestrator import Orchestrator  # noqa: E402
 from utils.paths import build_output_path  # noqa: E402
+from core.models import ASRSegment, DiarSegment, Utterance  # noqa: E402
 
 
 def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
     """Проверяет успешный запуск пайплайна и порядок вызовов."""
     src_path = "sample.mp4"
     audio_path = "sample.wav"
-    text_segments = ["text"]
-    speaker_segments = ["speaker"]
-    merged_lines = ["merged"]
+    text_segments = [ASRSegment(start=0.0, end=1.0, text="text")]
+    speaker_segments = [DiarSegment(start=0.0, end=1.0, speaker="speaker")]
+    merged_utterances = [
+        Utterance(
+            timespan="[00:00:00 — 00:00:01]",
+            speaker="speaker",
+            text="text",
+            words=["text"],
+        )
+    ]
     expected_path = build_output_path(src_path)
     call_order: list[str] = []
 
@@ -42,26 +50,29 @@ def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
         "core.orchestrator.MediaProcessor", Mock(return_value=media_mock)
     )
 
-    def transcribe_side_effect(path: str) -> list[str]:
+    def transcribe_side_effect(path: str) -> list[ASRSegment]:
         call_order.append("transcribe")
         assert path == audio_path
         return text_segments
 
-    def diarize_side_effect(path: str) -> list[str]:
+    def diarize_side_effect(path: str) -> list[DiarSegment]:
         call_order.append("diarize")
         assert path == audio_path
         return speaker_segments
 
-    def merge_side_effect(ts: list[str], ds: list[str]) -> list[str]:
+    def merge_side_effect(
+        ts: list[ASRSegment], ds: list[DiarSegment]
+    ) -> list[Utterance]:
         call_order.append("merge")
         assert ts == text_segments
         assert ds == speaker_segments
-        return merged_lines
+        return merged_utterances
 
-    def export_side_effect(lines: list[str], path: str) -> None:
-        call_order.append("export")
-        assert lines == merged_lines
-        assert path == expected_path
+    def save_side_effect(items: list[Utterance], path: str) -> str:
+        call_order.append("save")
+        assert items == merged_utterances
+        assert path == src_path
+        return expected_path
 
     monkeypatch.setattr(
         "core.orchestrator.transcribe", Mock(side_effect=transcribe_side_effect)
@@ -70,10 +81,10 @@ def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
         "core.orchestrator.diarize", Mock(side_effect=diarize_side_effect)
     )
     monkeypatch.setattr(
-        "core.orchestrator.merge_results", Mock(side_effect=merge_side_effect)
+        "core.orchestrator.merge", Mock(side_effect=merge_side_effect)
     )
     monkeypatch.setattr(
-        "core.orchestrator.export_txt", Mock(side_effect=export_side_effect)
+        "core.orchestrator.save_txt", Mock(side_effect=save_side_effect)
     )
 
     result = Orchestrator().run(src_path)
@@ -85,5 +96,5 @@ def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
         "transcribe",
         "diarize",
         "merge",
-        "export",
+        "save",
     ]

@@ -8,9 +8,8 @@ from typing import Callable, Optional
 from core.asr_whisper import transcribe
 from core.diarization import diarize
 from core.media_proc import MediaProcessor
-from core.postprocess import merge_results
-from core.export_txt import export_txt
-from utils.paths import build_output_path
+from core.postprocess import merge
+from core.export_txt import save_txt
 
 
 logger = logging.getLogger(__name__)
@@ -45,10 +44,8 @@ class Orchestrator:
             with media.extract_audio(src_path) as audio_path:
                 text_segments = transcribe(audio_path)
                 speaker_segments = diarize(audio_path)
-                merged_lines = merge_results(text_segments, speaker_segments)
-
-                result_path = build_output_path(src_path)
-                export_txt(merged_lines, result_path)
+                utterances = merge(text_segments, speaker_segments)
+                result_path = save_txt(utterances, src_path)
 
             if self._on_done:
                 self._on_done(result_path)
