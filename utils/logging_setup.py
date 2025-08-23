@@ -35,9 +35,7 @@ def setup_logging(
     root.setLevel(level)
     root.handlers.clear()
 
-    formatter = logging.Formatter(
-        "%(asctime)s %(levelname)s %(name)s: %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 
     stream = logging.StreamHandler(sys.stdout)
     stream.setFormatter(formatter)
@@ -52,4 +50,3 @@ def setup_logging(
         gui_handler = GuiLogHandler(gui_callback)
         gui_handler.setFormatter(formatter)
         root.addHandler(gui_handler)
-
