@@ -1,7 +1,8 @@
 """Модуль транскрибации."""
 
-from typing import List
+import logging
 import os
+from typing import List
 
 from dotenv import load_dotenv
 
@@ -13,6 +14,9 @@ except Exception:  # noqa: BLE001
 import whisper
 
 from core.models import ASRSegment
+
+
+logger = logging.getLogger(__name__)
 
 
 load_dotenv()
@@ -32,6 +36,7 @@ def transcribe(wav_path: str, model: str = "small") -> List[ASRSegment]:
     :param model: название модели Whisper (по умолчанию ``small``).
     :return: список сегментов с началом, концом и текстом.
     """
+    logger.info("Запуск распознавания модели %s", model)
     asr = whisper.load_model(model)
     result = asr.transcribe(wav_path)
     return [

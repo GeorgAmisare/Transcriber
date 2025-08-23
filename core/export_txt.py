@@ -1,9 +1,13 @@
 """Экспорт в текстовый файл."""
 
+import logging
 from typing import List
 
 from .models import Utterance
 from utils.paths import build_output_path
+
+
+logger = logging.getLogger(__name__)
 
 
 def export_txt(lines: List[str], path: str) -> str:
@@ -13,6 +17,7 @@ def export_txt(lines: List[str], path: str) -> str:
     :param path: путь к результирующему файлу.
     :return: путь к созданному файлу.
     """
+    logger.info("Сохранение текста в %s", path)
     with open(path, "w", encoding="utf-8") as file:
         file.write("\n".join(lines))
     return path

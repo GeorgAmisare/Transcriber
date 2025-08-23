@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import subprocess
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Iterator
+
+
+logger = logging.getLogger(__name__)
 
 
 class MediaProcessor:
@@ -47,6 +51,7 @@ class MediaProcessor:
         :param path: путь к медиафайлу.
         :raises ValueError: при нарушении ограничений.
         """
+        logger.debug("Проверка файла %s", path)
         extension = Path(path).suffix.lower()
         if extension not in self._SUPPORTED_EXTENSIONS:
             raise ValueError("Недопустимый формат файла")
@@ -81,7 +86,9 @@ class MediaProcessor:
                 text=True,
                 check=True,
             )
-            return float(result.stdout.strip())
+            duration = float(result.stdout.strip())
+            logger.debug("Длительность файла %s секунд", duration)
+            return duration
         except (FileNotFoundError, subprocess.SubprocessError, ValueError) as error:
             raise ValueError("Не удалось определить длительность файла") from error
 
@@ -107,6 +114,7 @@ class MediaProcessor:
             "s16",
             tmp_path,
         ]
+        logger.info("Извлечение аудио из %s", path)
         try:
             subprocess.run(
                 cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
@@ -115,5 +123,6 @@ class MediaProcessor:
         finally:
             try:
                 os.remove(tmp_path)
+                logger.debug("Удалён временный файл %s", tmp_path)
             except OSError:
                 pass

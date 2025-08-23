@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -9,6 +10,9 @@ from PyQt5.QtGui import QDragEnterEvent, QDropEvent
 from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 from gui import messages
+
+
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QWidget):
@@ -74,5 +78,6 @@ class MainWindow(QWidget):
         urls = event.mimeData().urls()
         if urls:
             file_path = urls[0].toLocalFile()
+            logger.info("Получен файл %s", file_path)
             self.set_processing()
             self.file_dropped.emit(file_path)

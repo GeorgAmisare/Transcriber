@@ -1,6 +1,10 @@
 """Утилиты работы с путями."""
 
+import logging
 from pathlib import Path
+
+
+logger = logging.getLogger(__name__)
 
 
 def build_output_path(src: str) -> str:
@@ -10,4 +14,6 @@ def build_output_path(src: str) -> str:
     :return: путь к файлу с суффиксом _transcript.
     """
     path = Path(src)
-    return str(path.with_name(f"{path.stem}_transcript.txt"))
+    result = path.with_name(f"{path.stem}_transcript.txt")
+    logger.debug("Итоговый путь %s", result)
+    return str(result)

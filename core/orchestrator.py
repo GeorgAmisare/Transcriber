@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Callable, Optional
 
 from core.asr_whisper import transcribe
@@ -12,21 +13,18 @@ from core.export_txt import export_txt
 from utils.paths import build_output_path
 
 
+logger = logging.getLogger(__name__)
+
+
 class Orchestrator:
     """Связывает все этапы обработки файла."""
 
-    def __init__(
-        self,
-        on_done: Optional[Callable[[str], None]] = None,
-        on_error: Optional[Callable[[str], None]] = None,
-    ) -> None:
+    def __init__(self, on_done: Optional[Callable[[str], None]] = None) -> None:
         """Создаёт оркестратор.
 
         :param on_done: колбэк при успешном завершении.
-        :param on_error: колбэк при возникновении ошибки.
         """
         self._on_done = on_done
-        self._on_error = on_error
 
     def run(self, src_path: str) -> Optional[str]:
         """Запускает пайплайн обработки файла.
@@ -40,6 +38,7 @@ class Orchestrator:
         :param src_path: путь к исходному медиафайлу.
         :return: путь к итоговому файлу или ``None`` при ошибке.
         """
+        logger.info("Запуск пайплайна для %s", src_path)
         try:
             media = MediaProcessor()
             media.validate(src_path)
@@ -53,8 +52,8 @@ class Orchestrator:
 
             if self._on_done:
                 self._on_done(result_path)
+            logger.info("Обработка %s завершена", src_path)
             return result_path
         except Exception as error:  # noqa: BLE001
-            if self._on_error:
-                self._on_error(str(error))
+            logger.exception("Ошибка при обработке %s", src_path)
             return None
