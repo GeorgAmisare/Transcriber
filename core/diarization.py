@@ -1,62 +1,50 @@
-"""Модуль диаризации."""
+"""Модуль диаризации на основе pyannote.audio."""
+
+from __future__ import annotations
 
 import logging
-import wave
+import os
 from typing import List
 
-import numpy as np
+from pyannote.audio import Pipeline
 
 from .models import DiarSegment
 
 
 logger = logging.getLogger(__name__)
 
+_PIPELINE: Pipeline | None = None
 
-def _dominant_freq(samples: np.ndarray, rate: int) -> float:
-    """Возвращает доминирующую частоту фрагмента."""
-    spectrum = np.fft.rfft(samples)
-    freqs = np.fft.rfftfreq(len(samples), 1 / rate)
-    return float(freqs[int(np.argmax(np.abs(spectrum)))])
+
+def _load_pipeline() -> Pipeline:
+    """Загружает пайплайн с использованием токена HF_TOKEN."""
+
+    global _PIPELINE
+    if _PIPELINE is None:
+        token = os.getenv("HF_TOKEN")
+        _PIPELINE = Pipeline.from_pretrained(
+            "pyannote/speaker-diarization", use_auth_token=token
+        )
+    return _PIPELINE
 
 
 def diarize(path: str) -> List[DiarSegment]:
-    """Определяет спикеров по смене частоты.
+    """Определяет спикеров в аудиофайле.
 
     :param path: путь к wav-файлу.
     :return: список сегментов с идентификатором спикера.
     """
+
     logger.info("Диаризация файла %s", path)
-    with wave.open(path, "rb") as wav:
-        rate = wav.getframerate()
-        frames = wav.readframes(wav.getnframes())
-    samples = np.frombuffer(frames, dtype=np.int16).astype(float) / 32768.0
-
-    frame_size = int(rate * 0.5)
-    threshold = 30.0
+    pipeline = _load_pipeline()
+    diarization = pipeline(path)
     segments: List[DiarSegment] = []
-    current_start = 0.0
-    prev_freq: float | None = None
-    speaker_idx = 0
-
-    for offset in range(0, len(samples) - frame_size + 1, frame_size):
-        frame = samples[offset : offset + frame_size]
-        freq = _dominant_freq(frame, rate)
-        if prev_freq and abs(freq - prev_freq) > threshold:
-            end = offset / rate
-            segments.append(
-                DiarSegment(
-                    start=current_start, end=end, speaker=f"speaker_{speaker_idx}"
-                )
+    for segment, _, speaker in diarization.itertracks(yield_label=True):
+        segments.append(
+            DiarSegment(
+                start=float(segment.start),
+                end=float(segment.end),
+                speaker=str(speaker),
             )
-            current_start = end
-            speaker_idx = 1 - speaker_idx
-        prev_freq = freq
-
-    segments.append(
-        DiarSegment(
-            start=current_start,
-            end=len(samples) / rate,
-            speaker=f"speaker_{speaker_idx}",
         )
-    )
     return segments
