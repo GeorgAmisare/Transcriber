@@ -80,9 +80,7 @@ def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         "core.orchestrator.diarize", Mock(side_effect=diarize_side_effect)
     )
-    monkeypatch.setattr(
-        "core.orchestrator.merge", Mock(side_effect=merge_side_effect)
-    )
+    monkeypatch.setattr("core.orchestrator.merge", Mock(side_effect=merge_side_effect))
     monkeypatch.setattr(
         "core.orchestrator.save_txt", Mock(side_effect=save_side_effect)
     )
