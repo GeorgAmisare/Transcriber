@@ -4,8 +4,11 @@ import os
 from pathlib import Path
 
 import pytest
+from dotenv import load_dotenv
 
 from core.media_proc import MediaProcessor
+
+load_dotenv()
 
 
 def _collect_media() -> list[Path]:
@@ -19,7 +22,10 @@ def _collect_media() -> list[Path]:
     ]
 
 
-@pytest.mark.skipif(bool(os.getenv("CI")), reason="Медиафайлы не хранятся в CI")
+@pytest.mark.skipif(
+    bool(os.getenv("CI")) or os.getenv("TEST_WITH_MATERIALS", "0") != "1",
+    reason="Медиафайлы недоступны для тестов",
+)
 def test_all_local_media_files_valid() -> None:
     """Проверяет, что все локальные медиафайлы проходят валидацию."""
     files = _collect_media()
