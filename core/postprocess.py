@@ -1,9 +1,13 @@
 """Модуль постобработки."""
 
+import logging
 from typing import List
 
 from .models import ASRSegment, DiarSegment, Utterance
 from utils.timing import format_ts
+
+
+logger = logging.getLogger(__name__)
 
 
 def merge_results(text: List[str], speakers: List[str]) -> List[str]:
@@ -13,6 +17,7 @@ def merge_results(text: List[str], speakers: List[str]) -> List[str]:
     :param speakers: список спикеров.
     :return: список готовых строк.
     """
+    logger.debug("Слияние %d строк", len(text))
     return [f"{s}: {t}" for s, t in zip(speakers, text)]
 
 
@@ -36,6 +41,11 @@ def merge(
     :param diar_segments: сегменты с идентификатором спикера.
     :return: список готовых реплик.
     """
+    logger.debug(
+        "Сопоставление %d сегментов ASR и %d сегментов диаризации",
+        len(asr_segments),
+        len(diar_segments),
+    )
     utterances: List[Utterance] = []
     last_speaker = "unknown"
 

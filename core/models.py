@@ -1,7 +1,11 @@
 """Дата-классы проекта."""
 
+import logging
 from dataclasses import dataclass
 from typing import List
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass

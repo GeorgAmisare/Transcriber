@@ -1,10 +1,15 @@
 """Модуль диаризации."""
 
-from typing import List
+import logging
 import wave
+from typing import List
+
 import numpy as np
 
 from .models import DiarSegment
+
+
+logger = logging.getLogger(__name__)
 
 
 def _dominant_freq(samples: np.ndarray, rate: int) -> float:
@@ -20,6 +25,7 @@ def diarize(path: str) -> List[DiarSegment]:
     :param path: путь к wav-файлу.
     :return: список сегментов с идентификатором спикера.
     """
+    logger.info("Диаризация файла %s", path)
     with wave.open(path, "rb") as wav:
         rate = wav.getframerate()
         frames = wav.readframes(wav.getnframes())
