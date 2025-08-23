@@ -164,3 +164,6 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+# Тестовые медиафайлы
+/tests/data/*
+!/tests/data/.gitkeep
