@@ -52,27 +52,23 @@ def _extract(archive: Path, folder: Path) -> None:
     archive.unlink()
 
 
-def ensure_ffmpeg() -> Tuple[Path, Path]:
-    """Гарантирует наличие ffmpeg и ffprobe.
+def _find_existing(ext: str) -> tuple[Path | None, Path | None]:
+    """Ищет ffmpeg и ffprobe в системе или по переменной окружения."""
+    env = os.getenv("FFMPEG_PATH")
+    if env:
+        ffmpeg = Path(env)
+        ffprobe = ffmpeg.with_name(f"ffprobe{ext}")
+        if ffmpeg.exists() and ffprobe.exists():
+            return ffmpeg, ffprobe
+    ffmpeg = shutil.which(f"ffmpeg{ext}")
+    ffprobe = shutil.which(f"ffprobe{ext}")
+    if ffmpeg and ffprobe:
+        return Path(ffmpeg), Path(ffprobe)
+    return None, None
 
-    :return: пути к бинарникам.
-    :raises RuntimeError: при ошибках загрузки.
-    """
-    system = platform.system()
-    ext = ".exe" if system == "Windows" else ""
-    candidates = [
-        shutil.which(f"ffmpeg{ext}"),
-        shutil.which(f"ffprobe{ext}"),
-    ]
-    if all(candidates):
-        return Path(candidates[0]), Path(candidates[1])
 
-    install = _install_dir()
-    ffmpeg_bin = install / f"ffmpeg{ext}"
-    ffprobe_bin = install / f"ffprobe{ext}"
-    if ffmpeg_bin.exists() and ffprobe_bin.exists():
-        return ffmpeg_bin, ffprobe_bin
-
+def _download_build(system: str, install: Path, ext: str) -> Tuple[Path, Path]:
+    """Скачивает и распаковывает статический билд FFmpeg."""
     urls = {
         "Windows": "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip",
         "Linux": "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz",
@@ -81,19 +77,37 @@ def ensure_ffmpeg() -> Tuple[Path, Path]:
     url = urls.get(system)
     if not url:
         raise RuntimeError("Неизвестная платформа для установки FFmpeg")
-
     sha = requests.get(url + ".sha256", timeout=60).text.split()[0]
     install.mkdir(parents=True, exist_ok=True)
     archive = install / Path(url).name
-    try:
-        _download(url, archive, sha)
-        _extract(archive, install)
-    except Exception as error:
-        shutil.rmtree(install, ignore_errors=True)
-        raise RuntimeError("Не удалось установить FFmpeg") from error
-
+    _download(url, archive, sha)
+    _extract(archive, install)
     ffmpeg_path = next(install.rglob(f"ffmpeg{ext}"))
     ffprobe_path = next(install.rglob(f"ffprobe{ext}"))
     ffmpeg_path.chmod(0o755)
     ffprobe_path.chmod(0o755)
     return ffmpeg_path, ffprobe_path
+
+
+def ensure_ffmpeg() -> Tuple[Path, Path]:
+    """Возвращает пути к ffmpeg и ffprobe, скачивая при необходимости."""
+    system = platform.system()
+    ext = ".exe" if system == "Windows" else ""
+    ffmpeg, ffprobe = _find_existing(ext)
+    if ffmpeg and ffprobe:
+        return ffmpeg, ffprobe
+
+    install = _install_dir()
+    ffmpeg_bin = install / f"ffmpeg{ext}"
+    ffprobe_bin = install / f"ffprobe{ext}"
+    if ffmpeg_bin.exists() and ffprobe_bin.exists():
+        return ffmpeg_bin, ffprobe_bin
+
+    if os.getenv("CI") or os.getenv("DISABLE_FFMPEG_DOWNLOAD"):
+        raise RuntimeError("FFmpeg не найден. Установите его или задайте FFMPEG_PATH")
+
+    try:
+        return _download_build(system, install, ext)
+    except Exception as error:
+        shutil.rmtree(install, ignore_errors=True)
+        raise RuntimeError("Не удалось установить FFmpeg") from error
