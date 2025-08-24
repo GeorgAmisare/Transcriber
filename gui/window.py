@@ -23,12 +23,17 @@ class MainWindow(QWidget):
 
     file_dropped = pyqtSignal(str)
     """Сигнал, испускаемый при успешном переносе файла."""
+    log_signal = pyqtSignal(str)
+    """Сигнал с новым сообщением логгера."""
 
     def __init__(self) -> None:
         """Создаёт окно и настраивает интерфейс."""
         super().__init__()
         self.setAcceptDrops(True)
         self.setWindowTitle("Транскрибатор")
+        self.setMinimumSize(300, 300)
+
+        self._is_processing = False
 
         self._status_label = QLabel(messages.READY_MESSAGE)
         self._status_label.setAlignment(Qt.AlignCenter)
@@ -37,6 +42,8 @@ class MainWindow(QWidget):
         layout.addWidget(self._status_label)
         self.setLayout(layout)
 
+        self.log_signal.connect(self.update_log)
+
     @property
     def status_label(self) -> QLabel:
         """Возвращает виджет с текстом статуса."""
@@ -44,10 +51,12 @@ class MainWindow(QWidget):
 
     def set_waiting(self) -> None:
         """Отображает ожидание загрузки файла."""
+        self._is_processing = False
         self._status_label.setText(messages.READY_MESSAGE)
 
     def set_processing(self) -> None:
         """Отображает процесс обработки файла."""
+        self._is_processing = True
         self._status_label.setText(messages.PROCESSING_MESSAGE)
 
     def set_done(self, result_path: Optional[str] = None) -> None:
@@ -55,9 +64,10 @@ class MainWindow(QWidget):
 
         :param result_path: путь к итоговому файлу.
         """
+        self._is_processing = False
         message = messages.DONE_MESSAGE
         if result_path:
-            message = f"{message}: {result_path}"
+            message = f"{message}: {result_path}\nВы можете загрузить новую запись."
         self._status_label.setText(message)
 
     def set_error(self, message: Optional[str] = None) -> None:
@@ -65,7 +75,13 @@ class MainWindow(QWidget):
 
         :param message: текст ошибки; по умолчанию стандартное сообщение.
         """
+        self._is_processing = False
         self._status_label.setText(message or messages.ERROR_MESSAGE)
+
+    def update_log(self, message: str) -> None:
+        """Обновляет статус последним сообщением логгера."""
+        if self._is_processing:
+            self._status_label.setText(f"{messages.PROCESSING_MESSAGE} {message}")
 
     # Реализация drag-n-drop -------------------------------------------------
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:  # noqa: N802
