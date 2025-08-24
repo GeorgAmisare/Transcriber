@@ -22,11 +22,7 @@ def _install_dir() -> Path:
         return base / "Transcriber" / "ffmpeg"
     if system == "Darwin":
         return (
-            Path.home()
-            / "Library"
-            / "Application Support"
-            / "Transcriber"
-            / "ffmpeg"
+            Path.home() / "Library" / "Application Support" / "Transcriber" / "ffmpeg"
         )
     return Path.home() / ".local" / "share" / "Transcriber" / "ffmpeg"
 
