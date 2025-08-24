@@ -10,6 +10,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Iterator
 
+from utils.ffmpeg_setup import ensure_ffmpeg
+
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +47,10 @@ class MediaProcessor:
         ".caf",
     }
 
+    def __init__(self) -> None:
+        """Ищет бинарники FFmpeg."""
+        self._ffmpeg, self._ffprobe = ensure_ffmpeg()
+
     def validate(self, path: str) -> None:
         """Проверяет формат, размер и длительность файла.
 
@@ -73,7 +79,7 @@ class MediaProcessor:
         try:
             result = subprocess.run(
                 [
-                    "ffprobe",
+                    str(self._ffprobe),
                     "-v",
                     "error",
                     "-show_entries",
@@ -99,7 +105,7 @@ class MediaProcessor:
             tmp_path = tmp.name
 
         cmd = [
-            "ffmpeg",
+            str(self._ffmpeg),
             "-y",
             "-i",
             path,
