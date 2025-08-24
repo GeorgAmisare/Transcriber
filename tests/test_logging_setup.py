@@ -22,7 +22,16 @@ def test_setup_logging_adds_handlers(tmp_path) -> None:
 def test_gui_handler_receives_error(tmp_path) -> None:
     """Проверяет отправку сообщения в GUI колбэк при ошибке."""
     received: list[str] = []
-    setup_logging(gui_callback=received.append)
+    setup_logging(error_callback=received.append)
     logger = logging.getLogger("test")
     logger.error("boom")
     assert received and "boom" in received[0]
+
+
+def test_status_handler_receives_info() -> None:
+    """Проверяет отправку статусного сообщения в GUI."""
+    received: list[str] = []
+    setup_logging(status_callback=received.append)
+    logger = logging.getLogger("status")
+    logger.info("ready")
+    assert received and "ready" in received[0]
