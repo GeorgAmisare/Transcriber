@@ -31,6 +31,10 @@ def build() -> None:
             # pyannote.audio.pipelines.
             "--collect-all",
             "pyannote.audio",
+            # Упаковываем зависимость speechbrain, которую использует
+            # pyannote.audio для спикер-верификации.
+            "--collect-all",
+            "speechbrain",
         ]
     )
 

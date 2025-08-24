@@ -13,6 +13,9 @@ from typing import Iterator
 
 logger = logging.getLogger(__name__)
 
+# Флаг скрывает окна консоли при запуске подпроцессов на Windows.
+_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
 
 class MediaProcessor:
     """Извлекает и нормализует аудио."""
@@ -85,6 +88,7 @@ class MediaProcessor:
                 capture_output=True,
                 text=True,
                 check=True,
+                creationflags=_NO_WINDOW,
             )
             duration = float(result.stdout.strip())
             logger.debug("Длительность файла %s секунд", duration)
@@ -117,7 +121,11 @@ class MediaProcessor:
         logger.info("Извлечение аудио из %s", path)
         try:
             subprocess.run(
-                cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                cmd,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=_NO_WINDOW,
             )
             yield tmp_path
         finally:
