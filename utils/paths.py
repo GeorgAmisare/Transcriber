@@ -13,9 +13,11 @@ def build_output_path(src: str) -> str:
     :param src: путь к исходному файлу.
     :return: путь к файлу с суффиксом _transcript.txt.
     """
+
     path = Path(src).expanduser()
     if not path.is_absolute():
         path = path.absolute()
+
     result = path.with_name(f"{path.stem}_transcript.txt")
     logger.debug("Итоговый путь %s", result)
     return str(result)
