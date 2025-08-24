@@ -7,3 +7,4 @@ pyannote.audio
 pytest
 python-dotenv
 huggingface_hub
+requests
