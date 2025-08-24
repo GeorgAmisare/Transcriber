@@ -15,3 +15,12 @@ def test_build_output_path_appends_suffix() -> None:
     expected = src.with_name(f"{src.stem}_transcript.txt")
     # Нормализуем обе стороны как Path, чтобы абстрагироваться от разделителей
     assert Path(build_output_path(str(src))) == expected
+
+
+def test_build_output_path_is_absolute(tmp_path, monkeypatch) -> None:
+    """Убеждается, что возвращается абсолютный путь."""
+    monkeypatch.chdir(tmp_path)
+    src = Path("meeting.mp3")
+    result = Path(build_output_path(str(src)))
+    assert result.is_absolute()
+    assert result == (tmp_path / "meeting_transcript.txt").resolve()
