@@ -22,6 +22,19 @@ def build() -> None:
             "lightning_fabric",
             "--collect-data",
             "pytorch_lightning",
+            # Копируем файлы модели Whisper (например, mel_filters.npz),
+            # иначе распознавание упадёт с FileNotFoundError после сборки.
+            "--collect-data",
+            "whisper",
+            # Включаем данные и подпакеты pyannote.audio, чтобы
+            # диаризация не падала с ModuleNotFoundError при импорте
+            # pyannote.audio.pipelines.
+            "--collect-all",
+            "pyannote.audio",
+            # Упаковываем зависимость speechbrain, которую использует
+            # pyannote.audio для спикер-верификации.
+            "--collect-all",
+            "speechbrain",
         ]
     )
 
