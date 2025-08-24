@@ -16,6 +16,12 @@ def build() -> None:
             "--onefile",
             "--noconsole",
             "--clean",
+            # Добавляем служебные файлы библиотек Lightning,
+            # чтобы exe не падал с FileNotFoundError.
+            "--collect-data",
+            "lightning_fabric",
+            "--collect-data",
+            "pytorch_lightning",
         ]
     )
 

@@ -99,6 +99,12 @@ python build.py
 dist\\transcriber.exe
 ```
 
+Скрипт `build.py` добавляет в сборку служебные данные пакетов
+`lightning_fabric` и `pytorch_lightning`. Это предотвращает ошибку
+`FileNotFoundError: version.info` при запуске собранного `exe`. Если
+используете `pyinstaller` вручную, добавьте флаги
+`--collect-data lightning_fabric --collect-data pytorch_lightning`.
+
 ## Обновление документации
 
 Этот файл необходимо актуализировать при добавлении новой функциональности.
