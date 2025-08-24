@@ -20,6 +20,14 @@ def test_export_txt_writes_file(tmp_path) -> None:
     assert path.read_text(encoding="utf-8") == "\n".join(lines)
 
 
+def test_export_txt_creates_parent_dirs(tmp_path) -> None:
+    """Создаёт недостающие директории перед записью."""
+    lines = ["строка"]
+    path = tmp_path / "nested" / "out.txt"
+    export_txt(lines, str(path))
+    assert path.read_text(encoding="utf-8") == "\n".join(lines)
+
+
 def test_export_srt_writes_file(tmp_path) -> None:
     """Проверяет запись строк в файл .srt."""
     lines = ["первая", "вторая"]

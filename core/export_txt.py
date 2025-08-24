@@ -1,6 +1,7 @@
 """Экспорт в текстовый файл."""
 
 import logging
+from pathlib import Path
 from typing import List
 
 from .models import Utterance
@@ -17,10 +18,11 @@ def export_txt(lines: List[str], path: str) -> str:
     :param path: путь к результирующему файлу.
     :return: путь к созданному файлу.
     """
-    logger.info("Сохранение текста в %s", path)
-    with open(path, "w", encoding="utf-8") as file:
-        file.write("\n".join(lines))
-    return path
+    output_path = Path(path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    logger.info("Сохранение текста в %s", output_path)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+    return str(output_path)
 
 
 def save_txt(utterances: List[Utterance], base_path: str) -> str:
