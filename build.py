@@ -22,6 +22,10 @@ def build() -> None:
             "lightning_fabric",
             "--collect-data",
             "pytorch_lightning",
+            # Копируем файлы модели Whisper (например, mel_filters.npz),
+            # иначе распознавание упадёт с FileNotFoundError после сборки.
+            "--collect-data",
+            "whisper",
         ]
     )
 
