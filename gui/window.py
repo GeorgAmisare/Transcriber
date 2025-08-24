@@ -31,7 +31,7 @@ class MainWindow(QWidget):
         super().__init__()
         self.setAcceptDrops(True)
         self.setWindowTitle("Транскрибатор")
-        self.setMinimumSize(300, 300)
+        self.setMinimumSize(750, 500)
 
         self._is_processing = False
 
