@@ -36,3 +36,4 @@ def test_build_output_path_resolves_symlink(tmp_path) -> None:
     src.touch()
     result = Path(build_output_path(str(src)))
     assert result.parent.resolve() == target.resolve()
+
