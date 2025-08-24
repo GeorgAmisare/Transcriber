@@ -18,6 +18,13 @@
                 "tests"
             ],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Сборка релиза",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/build.py",
+            "console": "integratedTerminal"
         }
     ]
 }
