@@ -24,3 +24,16 @@ def test_build_output_path_is_absolute(tmp_path, monkeypatch) -> None:
     result = Path(build_output_path(str(src)))
     assert result.is_absolute()
     assert result == (tmp_path / "meeting_transcript.txt").resolve()
+
+
+def test_build_output_path_resolves_symlink(tmp_path) -> None:
+    """Возвращает путь внутри реального каталога, а не ссылки."""
+    target = tmp_path / "real"
+    target.mkdir()
+    link = tmp_path / "link"
+    link.symlink_to(target)
+    src = link / "audio.mp3"
+    src.touch()
+    result = Path(build_output_path(str(src)))
+    assert result.parent.resolve() == target.resolve()
+

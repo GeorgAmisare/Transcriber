@@ -21,7 +21,11 @@ def export_txt(lines: List[str], path: str) -> str:
     output_path = Path(path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     logger.info("Сохранение текста в %s", output_path)
-    output_path.write_text("\n".join(lines), encoding="utf-8")
+
+    with output_path.open("w", encoding="utf-8", newline="\n") as file:
+        file.write("\n".join(lines))
+        file.flush()
+
     return str(output_path)
 
 
