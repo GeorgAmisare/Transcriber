@@ -20,6 +20,14 @@ def test_export_txt_writes_file(tmp_path) -> None:
     assert path.read_text(encoding="utf-8") == "\n".join(lines)
 
 
+def test_export_txt_creates_parent_dirs(tmp_path) -> None:
+    """Создаёт недостающие директории перед записью."""
+    lines = ["строка"]
+    path = tmp_path / "nested" / "out.txt"
+    export_txt(lines, str(path))
+    assert path.read_text(encoding="utf-8") == "\n".join(lines)
+
+
 def test_export_srt_writes_file(tmp_path) -> None:
     """Проверяет запись строк в файл .srt."""
     lines = ["первая", "вторая"]
@@ -61,3 +69,23 @@ def test_save_txt_formats_times_and_utf8(tmp_path) -> None:
         "[00:00:01 — 00:00:02] Спикер 1: Привет\n"
         "[00:00:03 — 00:00:04] Спикер 2: Пока"
     )
+
+
+def test_save_txt_creates_file_near_source(tmp_path) -> None:
+    """Сохраняет итоговый файл рядом с исходным."""
+    src_dir = tmp_path / "папка с пробелом"
+    src_dir.mkdir()
+    src = src_dir / "видео.mp4"
+    src.write_text("", encoding="utf-8")
+    utterances = [
+        Utterance(
+            timespan="[00:00:00 — 00:00:01]",
+            speaker="Спикер 1",
+            text="Привет",
+            words=["Привет"],
+        )
+    ]
+    result = save_txt(utterances, str(src))
+    expected = src_dir / "видео_transcript.txt"
+    assert result == str(expected)
+    assert expected.exists()
