@@ -26,6 +26,11 @@ def build() -> None:
             # иначе распознавание упадёт с FileNotFoundError после сборки.
             "--collect-data",
             "whisper",
+            # Включаем данные и подпакеты pyannote.audio, чтобы
+            # диаризация не падала с ModuleNotFoundError при импорте
+            # pyannote.audio.pipelines.
+            "--collect-all",
+            "pyannote.audio",
         ]
     )
 
